@@ -9,6 +9,8 @@ import ru.testspring.model.Reservation;
 import ru.testspring.service.ReservationService;
 
 import java.util.List;
+import java.util.NoSuchElementException;
+
 @RestController
 @RequestMapping("/reservation")
 public class ReservationController {
@@ -40,4 +42,32 @@ public class ReservationController {
                 .header("test-header", "123")
                 .body(reservationService.createReservation(reservationToCreate));
     }
-} //todo "1^47^56"
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Reservation> updateReservation(@PathVariable("id") Long id,
+                                                         @RequestBody Reservation reservationToUpdate) {
+        log.info("called method updateReservation id={}, reservationToUpdate={}",
+                id, reservationToUpdate);
+        var updated = reservationService.updateReservation(id, reservationToUpdate);
+        return ResponseEntity.ok(updated);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteReservation(@PathVariable("id") Long id) {
+        log.info("called method deleteReservation id={}", id);
+        try {
+            reservationService.deleteReservation(id);
+            return ResponseEntity.ok().build();
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(404).build();
+        }
+    }
+    @PostMapping("/{id}/approve")
+    public ResponseEntity<Reservation>approveReservation(@PathVariable("id") Long id) {
+        log.info("called method appoveReservation: id={}", id);
+        var reservation= reservationService.approveReservation(id);
+        return ResponseEntity.ok(reservation);
+    }
+
+
+} //todo "2^36^53"
