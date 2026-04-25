@@ -14,7 +14,7 @@ import java.util.NoSuchElementException;
 @RestController
 @RequestMapping("/reservation")
 public class ReservationController {
-    private static final Logger log = LoggerFactory.getLogger((ReservationController.class));
+    private static final Logger LOG = LoggerFactory.getLogger((ReservationController.class));
 
     public ReservationController(ReservationService reservationService) {
         this.reservationService = reservationService;
@@ -24,20 +24,20 @@ public class ReservationController {
 
     @GetMapping("{id}")
     public ResponseEntity<Reservation> getReservationById(@PathVariable("id") Long id) {
-        log.info("вызвался метод getReservationById: id=" + id);
+        LOG.info("вызвался метод getReservationById: id=" + id);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(reservationService.getReservationById(id));
     }
 
     @GetMapping()
     public ResponseEntity<List<Reservation>> getAllReservations() {
-        log.info("вызвался метод getAllReservations");
+        LOG.info("вызвался метод getAllReservations");
         return ResponseEntity.ok(reservationService.findAllReservation());
     }
 
     @PostMapping()
     public ResponseEntity<Reservation> createReservation(@RequestBody Reservation reservationToCreate) {
-        log.info("Called createReservation");
+        LOG.info("Called createReservation");
         return ResponseEntity.status(HttpStatus.CREATED)
                 .header("test-header", "123")
                 .body(reservationService.createReservation(reservationToCreate));
@@ -46,26 +46,27 @@ public class ReservationController {
     @PutMapping("/{id}")
     public ResponseEntity<Reservation> updateReservation(@PathVariable("id") Long id,
                                                          @RequestBody Reservation reservationToUpdate) {
-        log.info("called method updateReservation id={}, reservationToUpdate={}",
+        LOG.info("called method updateReservation id={}, reservationToUpdate={}",
                 id, reservationToUpdate);
         var updated = reservationService.updateReservation(id, reservationToUpdate);
         return ResponseEntity.ok(updated);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id}/cancel")
     public ResponseEntity<Void> deleteReservation(@PathVariable("id") Long id) {
-        log.info("called method deleteReservation id={}", id);
+        LOG.info("called method deleteReservation id={}", id);
         try {
-            reservationService.deleteReservation(id);
+            reservationService.cancelReservation(id);
             return ResponseEntity.ok().build();
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(404).build();
         }
     }
+
     @PostMapping("/{id}/approve")
-    public ResponseEntity<Reservation>approveReservation(@PathVariable("id") Long id) {
-        log.info("called method appoveReservation: id={}", id);
-        var reservation= reservationService.approveReservation(id);
+    public ResponseEntity<Reservation> approveReservation(@PathVariable("id") Long id) {
+        LOG.info("called method appoveReservation: id={}", id);
+        var reservation = reservationService.approveReservation(id);
         return ResponseEntity.ok(reservation);
     }
 

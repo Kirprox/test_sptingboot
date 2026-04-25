@@ -1,6 +1,9 @@
 package ru.testspring.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import ru.testspring.model.Reservation;
 import ru.testspring.model.ReservationEntity;
@@ -12,6 +15,8 @@ import java.util.*;
 
 @Service
 public class ReservationService {
+    private static final Logger LOG = LoggerFactory.getLogger(ReservationService.class);
+
     private ReservationRepository repository;
 
     public ReservationService(ReservationRepository reservationRepository) {
@@ -20,7 +25,7 @@ public class ReservationService {
 
 
     public Reservation getReservationById(Long id) {
-
+        repository.findAllByStatusIs(ReservationStatus.APPROVED);
         ReservationEntity reservationEntity = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Not found reservation by id = " + id));
         return toDomainReservation(reservationEntity);
@@ -69,11 +74,13 @@ public class ReservationService {
         return toDomainReservation(updatedReservation);
     }
 
-    public void deleteReservation(Long id) {
+    @Transactional
+    public void cancelReservation(Long id) {
         if (!repository.existsById(id)) {
             throw new EntityNotFoundException("Not found reservation by id " + id);
         }
-        repository.deleteById(id);
+        repository.setStatus(id, ReservationStatus.CANCELLED);
+        LOG.info("Successfully cancelled reservation: id={}", id);
     }
 
 
@@ -129,4 +136,4 @@ public class ReservationService {
         );
     }
 }
-// todo 3,29,23
+// todo 3,7,23
