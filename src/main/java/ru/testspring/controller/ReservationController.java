@@ -55,12 +55,8 @@ public class ReservationController {
     @DeleteMapping("/{id}/cancel")
     public ResponseEntity<Void> deleteReservation(@PathVariable("id") Long id) {
         LOG.info("called method deleteReservation id={}", id);
-        try {
             reservationService.cancelReservation(id);
             return ResponseEntity.ok().build();
-        } catch (NoSuchElementException e) {
-            return ResponseEntity.status(404).build();
-        }
     }
 
     @PostMapping("/{id}/approve")
