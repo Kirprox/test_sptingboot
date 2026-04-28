@@ -1,5 +1,6 @@
 package ru.testspring.controller;
 
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -9,7 +10,6 @@ import ru.testspring.model.Reservation;
 import ru.testspring.service.ReservationService;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/reservation")
@@ -36,7 +36,7 @@ public class ReservationController {
     }
 
     @PostMapping()
-    public ResponseEntity<Reservation> createReservation(@RequestBody Reservation reservationToCreate) {
+    public ResponseEntity<Reservation> createReservation(@RequestBody @Valid Reservation reservationToCreate) {
         LOG.info("Called createReservation");
         return ResponseEntity.status(HttpStatus.CREATED)
                 .header("test-header", "123")
@@ -45,7 +45,7 @@ public class ReservationController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Reservation> updateReservation(@PathVariable("id") Long id,
-                                                         @RequestBody Reservation reservationToUpdate) {
+                                                         @RequestBody @Valid Reservation reservationToUpdate) {
         LOG.info("called method updateReservation id={}, reservationToUpdate={}",
                 id, reservationToUpdate);
         var updated = reservationService.updateReservation(id, reservationToUpdate);

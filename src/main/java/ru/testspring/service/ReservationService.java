@@ -38,11 +38,11 @@ public class ReservationService {
     }
 
     public Reservation createReservation(Reservation reservationToCreate) {
-        if (reservationToCreate.id() != null) {
-            throw new IllegalArgumentException("id should be empty");
-        }
         if (reservationToCreate.status() != null) {
             throw new IllegalArgumentException("status should be empty");
+        }
+        if (!reservationToCreate.endDate().isAfter(reservationToCreate.startDate())) {
+            throw new IllegalArgumentException("Start date must be 1 day earlier than end date");
         }
         var entityToSave = new ReservationEntity(
                 null,
@@ -62,6 +62,9 @@ public class ReservationService {
         if (reservationEntity.getStatus() != ReservationStatus.PENDING) {
             throw new IllegalStateException("cannot modify reservation: status=" + reservationEntity.getStatus());
         }
+        if (!reservationToUpdate.endDate().isAfter(reservationToUpdate.startDate())) {
+            throw new IllegalArgumentException("Start date must be 1 day earlier than end date");
+        }
 
         reservationEntity.setUserId(reservationToUpdate.userId());
         reservationEntity.setRoomId(reservationToUpdate.roomId());
@@ -76,8 +79,13 @@ public class ReservationService {
 
     @Transactional
     public void cancelReservation(Long id) {
-        if (!repository.existsById(id)) {
-            throw new EntityNotFoundException("Not found reservation by id " + id);
+        var reservation = repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Not found reservation by id " + id));
+        if (reservation.getStatus().equals(ReservationStatus.APPROVED)) {
+            throw new IllegalStateException("cannot cancel approved reservation/ contact with manager pz");
+        }
+        if (reservation.getStatus().equals(ReservationStatus.CANCELLED)) {
+            throw new IllegalStateException("cannot cancel the reservation. Reservatiiion was already cancelled");
         }
         repository.setStatus(id, ReservationStatus.CANCELLED);
         LOG.info("Successfully cancelled reservation: id={}", id);
@@ -136,4 +144,4 @@ public class ReservationService {
         );
     }
 }
-// todo 4,17,25
+// todo 4,45,14
